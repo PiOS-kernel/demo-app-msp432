@@ -1,0 +1,4 @@
+[submodule "Kernel"]
+	path = Kernel
+	url = https://github.com/PiOS-kernel/Kernel.git
+	branch = main
