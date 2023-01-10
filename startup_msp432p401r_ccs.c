@@ -1,5 +1,10 @@
 /******************************************************************************
 * 
+*  PiOS startup routine
+*
+*  To generate this startup routine, the source code has been modified.
+*  Here, Texas Instruments' conditions are provided
+*
 *  Copyright (C) 2012 - 2017 Texas Instruments Incorporated - http://www.ti.com/ 
 * 
 *  Redistribution and use in source and binary forms, with or without 
@@ -39,16 +44,12 @@
 /* Linker variable that marks the top of the stack. */
 extern unsigned long __STACK_END;
 
-/* External declaration for the reset handler that is to be called when the */
-/* processor is started                                                     */
-extern void _c_int00(void);
-
 /* External declaration for system initialization function                  */
 extern void SystemInit(void);
 
 /* Forward declaration of the default fault handlers. */
 void Default_Handler            (void) __attribute__((weak));
-extern void Reset_Handler       (void) __attribute__((weak));
+extern void Reset_Handler       (void);
 
 /* Cortex-M4 Processor Exceptions */
 extern void NMI_Handler         (void) __attribute__((weak, alias("Default_Handler")));
@@ -56,12 +57,12 @@ extern void HardFault_Handler   (void) __attribute__((weak, alias("Default_Handl
 extern void MemManage_Handler   (void) __attribute__((weak, alias("Default_Handler")));
 extern void BusFault_Handler    (void) __attribute__((weak, alias("Default_Handler")));
 extern void UsageFault_Handler  (void) __attribute__((weak, alias("Default_Handler")));
-extern void SVC_Handler         (void) __attribute__((weak, alias("Default_Handler")));
+extern void SVC_Handler         (void);
 extern void DebugMon_Handler    (void) __attribute__((weak, alias("Default_Handler")));
-extern void PendSV_Handler      (void) __attribute__((weak, alias("Default_Handler")));
+extern void PendSV_Handler      (void);
 
 /* device specific interrupt handler */
-extern void SysTick_Handler     (void) __attribute__((weak,alias("Default_Handler")));
+extern void SysTick_Handler     (void);
 extern void PSS_IRQHandler      (void) __attribute__((weak,alias("Default_Handler")));
 extern void CS_IRQHandler       (void) __attribute__((weak,alias("Default_Handler")));
 extern void PCM_IRQHandler      (void) __attribute__((weak,alias("Default_Handler")));
@@ -182,11 +183,10 @@ void Reset_Handler(void)
 {
     SystemInit();
 
-    /* Jump to the CCS C Initialization Routine. */
-    __asm("    .global _c_int00\n"
-          "    b.w     _c_int00");
+    /* Jump to PiOS Initialization Routine. */
+    __asm("    .global _pios_c_int00\n"
+          "    b.w    _pios_c_int00");
 }
-
 
 /* This is the code that gets called when the processor receives an unexpected  */
 /* interrupt.  This simply enters an infinite loop, preserving the system state */
