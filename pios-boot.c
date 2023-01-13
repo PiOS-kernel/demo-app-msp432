@@ -80,7 +80,7 @@ extern int SystemCoreClock;
 #define NEEDS_FP 1
 #endif
 
-
+extern void uart_setup();
 extern void kernel_init();
 extern void SysTick_init(int val);
 extern void SysTick_enable();
@@ -117,15 +117,17 @@ void start();
 
 void start(){
 
-    // setup SysTick
-    SysTick_init(systick_freq); // +- 1ms
-    SysTick_enable();
+    // UART SETUP
+    uart_setup();
 
     // __asm__("MRS R0, CONTROL\n\t");
     // __asm__("MOV R0, #0");
     // __asm__("MSR CONTROL, R0");
     kernel_init();
     setup();
+    // setup SysTick
+    SysTick_init(systick_freq); // +- 1ms
+    SysTick_enable();
     start_scheduler();
 
    // non dovrebbe mai raggiungere questa exit perchè task_switch
@@ -165,4 +167,9 @@ void _pios_c_int00_noinit_noargs(void)
 
 /* defined here just because TI compiler looks for the main function */
 void main(void){}
+
+void HardFault_Handler(){
+    serial_println("Hard fault");
+    while(1);
+}
 
