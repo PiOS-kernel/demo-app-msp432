@@ -19,7 +19,6 @@ void led_init(){
 }
 
 void setup_led_blinking(){
-    led_init();
     // TASK_TIME_UNITS = 100;
     starting_time = get_clock();
     serial_print_int(starting_time);

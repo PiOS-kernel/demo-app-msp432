@@ -26,6 +26,7 @@ void taskRed();
 void taskGreen();
 void taskBlue();
 
+void led_init();
 void setup_led_blinking();
 void exit_led_blinking();
 uint32_t check_duration();
