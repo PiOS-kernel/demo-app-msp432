@@ -64,7 +64,7 @@ void setup(void)
 
 
     /* create manager task */
-    create_task((void(*)(void*)) manager, (void*)0, 8, NULL);
+    create_task((void(*)(void*)) manager, (void*)0, 0, NULL);
 }
 
 void manager(void){
@@ -127,29 +127,31 @@ void manager(void){
 			break;
 		}
 		enable_interrupts();
-		yield();
+		//yield();
 
-		// it will be get back here when all other tasks are killed (due to its lower priority)
-//		disable_interrupts();
-//		switch (choice)
-//		{
-//		case 1:
-//			/* exiting TEST 1: motion detection */
-//		    serial_println("Exiting T1\n");
-//			exit_motion_detection();
-//			break;
-//
-//		case 2:
-//			/* exiting TEST 2: led blinking */
-//		    serial_println("Exiting T2\n");
-//			exit_led_blinking();
-//			break;
-//
-//		default:
-//			break;
-//		}
+		event_wait(testEvent);
+		disable_interrupts();
+		switch (choice)
+		{
+		case 1:
+			/* exiting TEST 1: motion detection */
+		    serial_println("Exiting T1\n");
+			exit_motion_detection();
+			break;
+
+		case 2:
+			/* exiting TEST 2: led blinking */
+		    serial_println("Exiting T2\n");
+			exit_led_blinking();
+			break;
+
+		default:
+			break;
+		}
 		test_number = 0;
-//		enable_interrupts();
+		enable_interrupts();
+
+
 	}
 }
 
@@ -168,23 +170,8 @@ void PORT3_IRQHandler(void)
 			busy_wait(0x5FFFF);
 			event_post(testEvent, &choice);
 		} else {
-            switch (test_number)
-                    {
-                    case 1:
-                        /* exiting TEST 1: motion detection */
-                        serial_println("Exiting T1\n");
-                        exit_motion_detection();
-                        break;
-
-                    case 2:
-                        /* exiting TEST 2: led blinking */
-                        serial_println("Exiting T2\n");
-                        exit_led_blinking();
-                        break;
-
-                    default:
-                        break;
-                    }
+		    busy_wait(0x5FFFF);
+		    event_post(testEvent, 0);
         }
     }
     GPIO_clearInterruptFlag(GPIO_PORT_P3, status);
@@ -204,23 +191,8 @@ void PORT5_IRQHandler(void)
 			busy_wait(0x5FFFF);
 			event_post(testEvent, &choice);
 		} else {
-		    switch (test_number)
-		            {
-		            case 1:
-		                /* exiting TEST 1: motion detection */
-		                serial_println("Exiting T1\n");
-		                exit_motion_detection();
-		                break;
-
-		            case 2:
-		                /* exiting TEST 2: led blinking */
-		                serial_println("Exiting T2\n");
-		                exit_led_blinking();
-		                break;
-
-		            default:
-		                break;
-		            }
+		    busy_wait(0x5FFFF);
+		    event_post(testEvent, 0);
 		}
     }
     GPIO_clearInterruptFlag(GPIO_PORT_P5, status);
@@ -238,8 +210,8 @@ void pre_context_switch(void){
         GPIO_setOutputLowOnPin(BLUE_PORT, BLUE_PIN);
         uint32_t current_timing = check_duration();
 		if(current_timing == 100){
-		    serial_print_int(CLOCK);
-		    serial_print("\r\n");
+//		    serial_print_int(CLOCK);
+//		    serial_print("\r\n");
 			kcreate_task((void(*)(void*)) taskGreen, (void*)0, 2, &(timeGreen.task));
 		} else if (current_timing == 300)
 		{

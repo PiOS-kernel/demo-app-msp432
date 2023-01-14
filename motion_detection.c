@@ -32,8 +32,6 @@ void setup_motion_detection()
 
     kcreate_task(taskOrientation, 0, 2, &orientationHandle);
     kcreate_task(taskDisplay, 0, 1, &displayHandle);
-    kill(displayHandle);
-    kcreate_task(taskDisplay, 0, 1, &displayHandle);
 }
 
 void exit_motion_detection(){
@@ -47,7 +45,7 @@ void exit_motion_detection(){
 //    /* Disabling Interrupts */
 //    Interrupt_disableInterrupt(INT_ADC14);
 
-    //kill(orientationHandle);
+    kill(orientationHandle);
     kill(displayHandle);
 
     Graphics_clearDisplay(&g_sContext);
