@@ -4,6 +4,7 @@
 #include "uart.h"
 
 #include "led_blinking.h"
+#include "motion_detection.h"
 
 
 extern void _graphicsInit();
@@ -35,7 +36,11 @@ void setup(void)
 
     uart_setup();
     _graphicsInit();
-
+	_accelSensorInit();
+	led_init();
+	GPIO_setOutputLowOnPin(RED_PORT, RED_PIN);
+	GPIO_setOutputLowOnPin(GREEN_PORT, GREEN_PIN);
+	GPIO_setOutputLowOnPin(BLUE_PORT, BLUE_PIN);
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
 	testEvent = NEW_EVENT(uint32_t);
 
@@ -47,6 +52,8 @@ void setup(void)
     /* P5.1 as input for button */
     GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P5, GPIO_PIN1);
 
+    GPIO_enableInterrupt(GPIO_PORT_P5, GPIO_PIN1);
+    GPIO_enableInterrupt(GPIO_PORT_P3, GPIO_PIN5);
 
     /* Enable interrupts on Port 3 and 5 */
     Interrupt_enableInterrupt(INT_PORT3);
@@ -94,11 +101,11 @@ void manager(void){
 
 	uint32_t choice = 0;
 	while(1){
-		GPIO_enableInterrupt(GPIO_PORT_P5, GPIO_PIN1);
-		GPIO_enableInterrupt(GPIO_PORT_P3, GPIO_PIN5);
+//		GPIO_enableInterrupt(GPIO_PORT_P5, GPIO_PIN1);
+//		GPIO_enableInterrupt(GPIO_PORT_P3, GPIO_PIN5);
 		event_wait(testEvent);
-		GPIO_disableInterrupt(GPIO_PORT_P5, GPIO_PIN1);
-		GPIO_disableInterrupt(GPIO_PORT_P3, GPIO_PIN5);
+//		GPIO_disableInterrupt(GPIO_PORT_P5, GPIO_PIN1);
+//		GPIO_disableInterrupt(GPIO_PORT_P3, GPIO_PIN5);
 		get_event_msg(testEvent, &choice);
         test_number = choice;
 		disable_interrupts();
@@ -106,7 +113,7 @@ void manager(void){
 		{
 		case 1:
 			/* execute TEST 1: motion detection */
-			//setup_motion_detection();
+			setup_motion_detection();
 		    serial_println("T1\n");
 			break;
 		
@@ -123,26 +130,26 @@ void manager(void){
 		yield();
 
 		// it will be get back here when all other tasks are killed (due to its lower priority)
-		disable_interrupts();
-		switch (choice)
-		{
-		case 1:
-			/* exiting TEST 1: motion detection */
-		    serial_println("Exiting T1\n");
-			//exit_motion_detection();
-			break;
-		
-		case 2:
-			/* exiting TEST 2: led blinking */
-		    serial_println("Exiting T2\n");
-			exit_led_blinking();
-			break;
-		
-		default:
-			break;
-		}
+//		disable_interrupts();
+//		switch (choice)
+//		{
+//		case 1:
+//			/* exiting TEST 1: motion detection */
+//		    serial_println("Exiting T1\n");
+//			exit_motion_detection();
+//			break;
+//
+//		case 2:
+//			/* exiting TEST 2: led blinking */
+//		    serial_println("Exiting T2\n");
+//			exit_led_blinking();
+//			break;
+//
+//		default:
+//			break;
+//		}
 		test_number = 0;
-		enable_interrupts();
+//		enable_interrupts();
 	}
 }
 
@@ -161,9 +168,24 @@ void PORT3_IRQHandler(void)
 			busy_wait(0x5FFFF);
 			event_post(testEvent, &choice);
 		} else {
-			// exiting from a test
-			event_post(testEvent, 0);
-		}
+            switch (test_number)
+                    {
+                    case 1:
+                        /* exiting TEST 1: motion detection */
+                        serial_println("Exiting T1\n");
+                        exit_motion_detection();
+                        break;
+
+                    case 2:
+                        /* exiting TEST 2: led blinking */
+                        serial_println("Exiting T2\n");
+                        exit_led_blinking();
+                        break;
+
+                    default:
+                        break;
+                    }
+        }
     }
     GPIO_clearInterruptFlag(GPIO_PORT_P3, status);
 }
@@ -182,8 +204,23 @@ void PORT5_IRQHandler(void)
 			busy_wait(0x5FFFF);
 			event_post(testEvent, &choice);
 		} else {
-			// exiting from a test
-			event_post(testEvent, 0);
+		    switch (test_number)
+		            {
+		            case 1:
+		                /* exiting TEST 1: motion detection */
+		                serial_println("Exiting T1\n");
+		                exit_motion_detection();
+		                break;
+
+		            case 2:
+		                /* exiting TEST 2: led blinking */
+		                serial_println("Exiting T2\n");
+		                exit_led_blinking();
+		                break;
+
+		            default:
+		                break;
+		            }
 		}
     }
     GPIO_clearInterruptFlag(GPIO_PORT_P5, status);
