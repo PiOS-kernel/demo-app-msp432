@@ -81,6 +81,20 @@ void itoa(int n, char* dst) {
     }
 }
 
+int atoi(char* str){
+    int i = 0;
+    int sign = 1;
+    int result = 0;
+    if (str[0] == '-') {
+        sign = -1;
+        i++;
+    }
+    for (; str[i] != '\0'; i++) {
+        result = result * 10 + str[i] - '0';
+    }
+    return sign * result;
+}
+
 void serial_print_int(int n){
     char number[10];
     itoa(n, number);
