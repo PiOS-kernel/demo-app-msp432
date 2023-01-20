@@ -2,6 +2,7 @@
 
 EventHandle ADCevent;
 EventHandle displayEvent;
+PIPE* displayPipe;
 
 TaskHandle orientationHandle;
 TaskHandle displayHandle;
@@ -17,7 +18,8 @@ extern int atoi(const char* str);
 void setup_motion_detection()
 {
     // ADCevent = NEW_EVENT(uint16_t[3]);
-    displayEvent = NEW_EVENT(uint8_t);
+    //displayEvent = NEW_EVENT(uint8_t);
+    displayPipe = NEW_PIPE(1,uint8_t);
 
 //    /* Enabling the interrupt when a conversion on channel 2 (end of sequence)
 //     *  is complete and enabling conversions */
@@ -85,7 +87,8 @@ void taskOrientation(){
             if (Lcd_Orientation != LCD_ORIENTATION_LEFT)
             {
                 Lcd_Orientation = LCD_ORIENTATION_LEFT;
-                event_post(displayEvent, &Lcd_Orientation);
+                //event_post(displayEvent, &Lcd_Orientation);
+                pub_msg(displayPipe, (void*) &Lcd_Orientation);
             }
         }
         else if (ADCresults[0] > 10400)
@@ -94,7 +97,8 @@ void taskOrientation(){
             if (Lcd_Orientation != LCD_ORIENTATION_RIGHT)
             {
                 Lcd_Orientation = LCD_ORIENTATION_RIGHT;
-                event_post(displayEvent, &Lcd_Orientation);
+                //event_post(displayEvent, &Lcd_Orientation);
+                pub_msg(displayPipe, (void*) &Lcd_Orientation);
             }
         }
         else if (ADCresults[1] < 5600)
@@ -103,7 +107,8 @@ void taskOrientation(){
             if (Lcd_Orientation != LCD_ORIENTATION_UP)
             {
                 Lcd_Orientation = LCD_ORIENTATION_UP;
-                event_post(displayEvent, &Lcd_Orientation);
+                //event_post(displayEvent, &Lcd_Orientation);
+                pub_msg(displayPipe, (void*) &Lcd_Orientation);
             }
         }
         else if (ADCresults[1] > 10400)
@@ -112,7 +117,8 @@ void taskOrientation(){
             if (Lcd_Orientation != LCD_ORIENTATION_DOWN)
             {
                 Lcd_Orientation = LCD_ORIENTATION_DOWN;
-                event_post(displayEvent, &Lcd_Orientation);
+                //event_post(displayEvent, &Lcd_Orientation);
+                pub_msg(displayPipe, (void*) &Lcd_Orientation);
             }
         }
         else{
@@ -124,8 +130,9 @@ void taskOrientation(){
 void taskDisplay(){
     uint8_t Lcd_Orientation;
     while(1){
-        event_wait(displayEvent);
-        get_event_msg(displayEvent, &Lcd_Orientation);
+        //event_wait(displayEvent);
+        //get_event_msg(displayEvent, &Lcd_Orientation);
+        read_msg(displayPipe, (void*) &Lcd_Orientation);
         Crystalfontz128x128_SetOrientation(Lcd_Orientation);
         drawData(1,2,3);
     }
