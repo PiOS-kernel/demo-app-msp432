@@ -4,6 +4,7 @@
 #include "Kernel/kernel/kernel.h"
 #include "stdint.h"
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
+#include "uart.h"
 
 #define RED_PORT GPIO_PORT_P2
 #define RED_PIN GPIO_PIN6
