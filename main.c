@@ -30,10 +30,6 @@ void manager(void);
  */
 void setup(void)
 {
-	// pin buttons to let the user choice the test to run
-	// P35
-	// P51
-
     uart_setup();
     _graphicsInit();
 	_accelSensorInit();
@@ -61,51 +57,26 @@ void setup(void)
     /* activate interrupt notification */
     Interrupt_enableMaster();
 
+	/* print logo */
+	serial_println("\nWELCOME IN THIS DEMO - powered by");
+	serial_println(" ____      _     _____     ____ ");
+	serial_println("|  _ \\    (_)   |  _  |   / ___|");
+	serial_println("| |_)|    | |   | | | |   \\___  ");
+	serial_println("|  __/    | |   | |_| |    ___)|");
+	serial_println("|_|       |_|   |_____|   |____/ ");
 
+	serial_println("\n\nPress button 1 to start motion detection test");
+	serial_println("Press button 2 to start led blinking test");
 
     /* create manager task */
     create_task((void(*)(void*)) manager, (void*)0, 0, NULL);
 }
 
 void manager(void){
-
-
-//    disable_interrupts();
-//    GPIO_setAsOutputPin(RED_PORT, RED_PIN);
-//    GPIO_setAsOutputPin(GREEN_PORT, GREEN_PIN);
-//    GPIO_setAsOutputPin(BLUE_PORT, BLUE_PIN);
-//    GPIO_setOutputHighOnPin(RED_PORT, RED_PIN);
-//    busy_wait(0xAFFFF);
-//    GPIO_setOutputLowOnPin(RED_PORT, RED_PIN);
-//    GPIO_setOutputHighOnPin(GREEN_PORT, GREEN_PIN);
-//    busy_wait(0xAFFFF);
-//    GPIO_setOutputLowOnPin(GREEN_PORT, GREEN_PIN);
-//    GPIO_setOutputHighOnPin(BLUE_PORT, BLUE_PIN);
-//    busy_wait(0xAFFFF);
-//    GPIO_setOutputLowOnPin(BLUE_PORT, BLUE_PIN);
-//    enable_interrupts();
-
-//        GPIO_setAsOutputPin(RED_PORT, RED_PIN);
-//        GPIO_setAsOutputPin(GREEN_PORT, GREEN_PIN);
-//        GPIO_setAsOutputPin(BLUE_PORT, BLUE_PIN);
-//
-//    while(1){
-//        GPIO_setOutputHighOnPin(GREEN_PORT, GREEN_PIN);
-//        busy_wait(0xFFFF);
-//        GPIO_setOutputLowOnPin(GREEN_PORT, GREEN_PIN);
-//        busy_wait(0xFFF);
-//    }
-
-    serial_println("READY");
-
-
 	uint32_t choice = 0;
 	while(1){
-//		GPIO_enableInterrupt(GPIO_PORT_P5, GPIO_PIN1);
-//		GPIO_enableInterrupt(GPIO_PORT_P3, GPIO_PIN5);
+	    serial_println("Press a button and choose the test to run");
 		event_wait(testEvent);
-//		GPIO_disableInterrupt(GPIO_PORT_P5, GPIO_PIN1);
-//		GPIO_disableInterrupt(GPIO_PORT_P3, GPIO_PIN5);
 		get_event_msg(testEvent, &choice);
         test_number = choice;
 		disable_interrupts();
@@ -114,34 +85,34 @@ void manager(void){
 		case 1:
 			/* execute TEST 1: motion detection */
 			setup_motion_detection();
-		    serial_println("T1\n");
+		    serial_println("Demo 1: Motion Detection");
+		    serial_println("Rotate the device and the screen will change accordingly");
 			break;
 		
 		case 2:
 			/* execute TEST 2: led blinking */
 			setup_led_blinking();
-		    serial_println("T2\n");
+			serial_println("Demo 2: Led blinking");
+            serial_println("The RGB Led will blink following a defined pattern due to the PRIORITY INHERITANCE that has been implemented");
 			break;
 		
 		default:
 			break;
 		}
 		enable_interrupts();
-		//yield();
-
 		event_wait(testEvent);
 		disable_interrupts();
 		switch (choice)
 		{
 		case 1:
 			/* exiting TEST 1: motion detection */
-		    serial_println("Exiting T1\n");
+		    //serial_println("Exiting T1\n");
 			exit_motion_detection();
 			break;
 
 		case 2:
 			/* exiting TEST 2: led blinking */
-		    serial_println("Exiting T2\n");
+		    //serial_println("Exiting T2\n");
 			exit_led_blinking();
 			break;
 
@@ -201,8 +172,6 @@ void PORT5_IRQHandler(void)
 extern uint32_t CLOCK;
 
 void pre_context_switch(void){
-//    serial_print_int(CLOCK);
-//        serial_print("\r\n");
     if(test_number == 2){
 		// LED BLINKING TEST
 	    GPIO_setOutputLowOnPin(RED_PORT, RED_PIN);
@@ -210,8 +179,6 @@ void pre_context_switch(void){
         GPIO_setOutputLowOnPin(BLUE_PORT, BLUE_PIN);
         uint32_t current_timing = check_duration();
 		if(current_timing == 10){
-		    //serial_print_int(CLOCK);
-		    //serial_print("\r\n");
 			kcreate_task((void(*)(void*)) taskGreen, (void*)0, 2, &(timeGreen.task));
 		} else if (current_timing == 30)
 		{
@@ -220,3 +187,4 @@ void pre_context_switch(void){
 		
 	}
 }
+
