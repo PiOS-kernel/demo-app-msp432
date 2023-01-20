@@ -209,11 +209,11 @@ void pre_context_switch(void){
         GPIO_setOutputLowOnPin(GREEN_PORT, GREEN_PIN);
         GPIO_setOutputLowOnPin(BLUE_PORT, BLUE_PIN);
         uint32_t current_timing = check_duration();
-		if(current_timing == 100){
-//		    serial_print_int(CLOCK);
-//		    serial_print("\r\n");
+		if(current_timing == 10){
+		    //serial_print_int(CLOCK);
+		    //serial_print("\r\n");
 			kcreate_task((void(*)(void*)) taskGreen, (void*)0, 2, &(timeGreen.task));
-		} else if (current_timing == 300)
+		} else if (current_timing == 30)
 		{
 			kcreate_task((void(*)(void*)) taskRed, (void*)0, 1, &(timeRed.task));
 		}
