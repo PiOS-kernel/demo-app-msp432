@@ -34,7 +34,7 @@ uint32_t check_duration(){
 void taskRed(){
     synch_wait(mutex);
     uint32_t  i = 0;
-    for(; i < 100; i++){
+    for(; i < 35; i++){
         GPIO_toggleOutputOnPin(RED_PORT, RED_PIN);
         busy_wait(WAITING);
     }
@@ -44,7 +44,7 @@ void taskRed(){
 
 void taskGreen(){
     uint32_t  i = 0;
-    for(; i < 100; i++){
+    for(; i < 35; i++){
         GPIO_toggleOutputOnPin(GREEN_PORT, GREEN_PIN);
         busy_wait(WAITING);
     }
@@ -54,7 +54,7 @@ void taskGreen(){
 void taskBlue(){
     synch_wait(mutex);
     uint32_t  i = 0;
-    for(; i < 100; i++){
+    for(; i < 35; i++){
         GPIO_toggleOutputOnPin(BLUE_PORT, BLUE_PIN);
         busy_wait(WAITING);
     }

@@ -178,9 +178,9 @@ void pre_context_switch(void){
         GPIO_setOutputLowOnPin(GREEN_PORT, GREEN_PIN);
         GPIO_setOutputLowOnPin(BLUE_PORT, BLUE_PIN);
         uint32_t current_timing = check_duration();
-		if(current_timing == 10){
+		if(current_timing == 25){
 			kcreate_task((void(*)(void*)) taskGreen, (void*)0, 2, &(timeGreen.task));
-		} else if (current_timing == 30)
+		} else if (current_timing == 65)
 		{
 			kcreate_task((void(*)(void*)) taskRed, (void*)0, 1, &(timeRed.task));
 		}
