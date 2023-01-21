@@ -57,12 +57,6 @@ void taskOrientation(){
                 msg.y = ADCresults[1];
                 msg.z = ADCresults[2];
                 pub_msg(displayPipe, (void*) &msg);
-                // disable_interrupts();
-                // pub_msg(displayPipe, (void*) &Lcd_Orientation);
-                // pub_msg(displayPipe, (void*) &ADCresults[0]);
-                // pub_msg(displayPipe, (void*) &ADCresults[1]);
-                // pub_msg(displayPipe, (void*) &ADCresults[2]);
-                // enable_interrupts();
             }
         }
         else if (ADCresults[0] > 10400)
@@ -113,10 +107,6 @@ void taskOrientation(){
 void taskDisplay(){
     motion_data_msg msg;
     while(1){
-        // read_msg(displayPipe, (void*) &Lcd_Orientation);
-        // read_msg(displayPipe, (void*) &x);
-        // read_msg(displayPipe, (void*) &y);
-        // read_msg(displayPipe, (void*) &z);
         read_msg(displayPipe, (void*) &msg);
         Crystalfontz128x128_SetOrientation(msg.Lcd_Orientation);
         drawData(msg.x, msg.y, msg.z);
