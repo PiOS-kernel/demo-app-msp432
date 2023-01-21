@@ -1,7 +1,6 @@
 #include "motion_detection.h"
 
 EventHandle ADCevent;
-EventHandle displayEvent;
 PIPE* displayPipe;
 
 TaskHandle orientationHandle;
@@ -10,12 +9,11 @@ TaskHandle displayHandle;
 Graphics_Context g_sContext;
 
 void drawData(uint16_t x, uint16_t y, uint16_t z);
-extern int atoi(const char* str);
 
 
 void setup_motion_detection()
 {
-    displayPipe = NEW_PIPE(1,uint8_t);
+    displayPipe = NEW_PIPE(1,motion_data_msg);
 
     /* Triggering the start of the sample */
     ADC14_enableConversion();
@@ -39,6 +37,7 @@ void exit_motion_detection(){
 void taskOrientation(){
     uint16_t ADCresults[3];
     uint8_t Lcd_Orientation = 5; // 5 is an invalid value
+    motion_data_msg msg;
     while(1){
         ADCresults[0] = ADC14_getResult(ADC_MEM0);
         ADCresults[1] = ADC14_getResult(ADC_MEM1);
@@ -53,7 +52,17 @@ void taskOrientation(){
             if (Lcd_Orientation != LCD_ORIENTATION_LEFT)
             {
                 Lcd_Orientation = LCD_ORIENTATION_LEFT;
-                pub_msg(displayPipe, (void*) &Lcd_Orientation);
+                msg.Lcd_Orientation = Lcd_Orientation;
+                msg.x = ADCresults[0];
+                msg.y = ADCresults[1];
+                msg.z = ADCresults[2];
+                pub_msg(displayPipe, (void*) &msg);
+                // disable_interrupts();
+                // pub_msg(displayPipe, (void*) &Lcd_Orientation);
+                // pub_msg(displayPipe, (void*) &ADCresults[0]);
+                // pub_msg(displayPipe, (void*) &ADCresults[1]);
+                // pub_msg(displayPipe, (void*) &ADCresults[2]);
+                // enable_interrupts();
             }
         }
         else if (ADCresults[0] > 10400)
@@ -62,7 +71,11 @@ void taskOrientation(){
             if (Lcd_Orientation != LCD_ORIENTATION_RIGHT)
             {
                 Lcd_Orientation = LCD_ORIENTATION_RIGHT;
-                pub_msg(displayPipe, (void*) &Lcd_Orientation);
+                msg.Lcd_Orientation = Lcd_Orientation;
+                msg.x = ADCresults[0];
+                msg.y = ADCresults[1];
+                msg.z = ADCresults[2];
+                pub_msg(displayPipe, (void*) &msg);
             }
         }
         else if (ADCresults[1] < 5600)
@@ -71,7 +84,11 @@ void taskOrientation(){
             if (Lcd_Orientation != LCD_ORIENTATION_UP)
             {
                 Lcd_Orientation = LCD_ORIENTATION_UP;
-                pub_msg(displayPipe, (void*) &Lcd_Orientation);
+                msg.Lcd_Orientation = Lcd_Orientation;
+                msg.x = ADCresults[0];
+                msg.y = ADCresults[1];
+                msg.z = ADCresults[2];
+                pub_msg(displayPipe, (void*) &msg);
             }
         }
         else if (ADCresults[1] > 10400)
@@ -80,7 +97,11 @@ void taskOrientation(){
             if (Lcd_Orientation != LCD_ORIENTATION_DOWN)
             {
                 Lcd_Orientation = LCD_ORIENTATION_DOWN;
-                pub_msg(displayPipe, (void*) &Lcd_Orientation);
+                msg.Lcd_Orientation = Lcd_Orientation;
+                msg.x = ADCresults[0];
+                msg.y = ADCresults[1];
+                msg.z = ADCresults[2];
+                pub_msg(displayPipe, (void*) &msg);
             }
         }
         else{
@@ -90,11 +111,15 @@ void taskOrientation(){
 }
 
 void taskDisplay(){
-    uint8_t Lcd_Orientation;
+    motion_data_msg msg;
     while(1){
-        read_msg(displayPipe, (void*) &Lcd_Orientation);
-        Crystalfontz128x128_SetOrientation(Lcd_Orientation);
-        drawData(1,2,3);
+        // read_msg(displayPipe, (void*) &Lcd_Orientation);
+        // read_msg(displayPipe, (void*) &x);
+        // read_msg(displayPipe, (void*) &y);
+        // read_msg(displayPipe, (void*) &z);
+        read_msg(displayPipe, (void*) &msg);
+        Crystalfontz128x128_SetOrientation(msg.Lcd_Orientation);
+        drawData(msg.x, msg.y, msg.z);
     }
 }
 
@@ -125,17 +150,27 @@ void _graphicsInit()
 void drawAccelData(uint16_t x, uint16_t y, uint16_t z)
 {
     char string[10];
-    sprintf(string, "X: %5d", x);
-    Graphics_drawStringCentered(&g_sContext, (int8_t *) string, 8, 64, 50,
-    OPAQUE_TEXT);
+    string[0] = 'X'; string[1] = ':'; string[2]=' ';
+    char number[10];
+    itoa(x, number);
+    Graphics_drawStringCentered(&g_sContext, (int8_t *) string, 3, 50, 50,
+                                OPAQUE_TEXT);
+    Graphics_drawStringCentered(&g_sContext, (int8_t *) number, 5, 75, 50,
+                                OPAQUE_TEXT);
 
-    sprintf(string, "Y: %5d", y);
-    Graphics_drawStringCentered(&g_sContext, (int8_t *) string, 8, 64, 70,
-    OPAQUE_TEXT);
+    string[0] = 'Y';
+    itoa(y, number);
+    Graphics_drawStringCentered(&g_sContext, (int8_t *) string, 3, 50, 70,
+                                OPAQUE_TEXT);
+    Graphics_drawStringCentered(&g_sContext, (int8_t *) number, 5, 75, 70,
+                                OPAQUE_TEXT);
 
-    sprintf(string, "Z: %5d", z);
-    Graphics_drawStringCentered(&g_sContext, (int8_t *) string, 8, 64, 90,
-    OPAQUE_TEXT);
+    string[0] = 'Z';
+    itoa(z, number);
+    Graphics_drawStringCentered(&g_sContext, (int8_t *) string, 3, 50, 90,
+                                OPAQUE_TEXT);
+    Graphics_drawStringCentered(&g_sContext, (int8_t *) number, 5, 75, 90,
+                                OPAQUE_TEXT);
 
 }
 
