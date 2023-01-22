@@ -1,10 +1,10 @@
 #include "msp.h"
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 #include "Kernel/kernel/kernel.h"
-#include "uart.h"
+#include "utils/uart.h"
 
-#include "led_blinking.h"
-#include "motion_detection.h"
+#include "led_blinking/led_blinking.h"
+#include "motion_detection/motion_detection.h"
 
 
 extern void _graphicsInit();
